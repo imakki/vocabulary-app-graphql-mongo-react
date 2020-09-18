@@ -27,4 +27,16 @@ module.exports = {
     const result = await word.save();
     return { ...result._doc };
   },
+  searchWords: async (args) => {
+    var w = args.word;
+    return Word.find({ word: { $regex: '.*' + w + '.*' } })
+      .then((result) => {
+        return result.map((word) => {
+          return word;
+        });
+      })
+      .catch((err) => {
+        throw new Error('No word found!');
+      });
+  },
 };

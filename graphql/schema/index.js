@@ -31,7 +31,8 @@ input EventInput {
 
 type RootQuery{
     events: [Event!]! 
-    words: [Word!]!                 
+    words: [Word!]!  
+    searchWords(word: String!): [Word!]!               
 }
 
 type RootMutation{
