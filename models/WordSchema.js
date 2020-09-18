@@ -66,7 +66,7 @@ WordSchema.pre('save', function (next) {
     .then((response) => {
       let results = response.data.results[0].lexicalEntries[0];
       this.definitions = results.entries.map(getEntryData);
-      console.log('Saving doc', JSON.stringify(this));
+      //console.log('Saving doc', JSON.stringify(this));
       next();
     })
     .catch((err) => {
