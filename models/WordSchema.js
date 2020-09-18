@@ -8,7 +8,7 @@ const DefinitionSchema = new Schema({
   etymologies: [String],
   definitions: [String],
   examples: [String],
-  lexicalCategory: [String],
+  lexicalCategory: String,
 });
 
 mongoose.model('Definition', DefinitionSchema);
@@ -29,11 +29,19 @@ function createDefinition(entry, wordDefinitions, examples) {
     examples: examples,
     lexicalCategory: entry.lexicalCategory,
   });
-  def.save();
+  def
+    .save()
+    .then((result) => {
+      return result;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
   return def;
 }
 
 function getEntryData(entry) {
+  //console.log(entry + 'here');
   let wordDefinitions = [];
   let examples = [];
 
@@ -45,7 +53,8 @@ function getEntryData(entry) {
       });
     }
   });
-
+  //console.log(wordDefinitions);
+  //console.log(examples);
   return createDefinition(entry, wordDefinitions, examples);
 }
 WordSchema.pre('save', function (next) {
@@ -56,44 +65,13 @@ WordSchema.pre('save', function (next) {
     )
     .then((response) => {
       let results = response.data.results[0].lexicalEntries[0];
-      const enteries = results.entries[0];
-      const senses = enteries.senses;
-      let wordDefinition = [];
-      const examples = [];
-      //console.log(enteries);
-      senses.forEach((sense) => {
-        wordDefinition = wordDefinition.concat(sense.definitions);
-        if (sense.examples) {
-          //definitions.concat(sense.definitions[0]);
-          sense.examples.forEach((example) => {
-            examples.push(example.text);
-          });
-        }
-      });
-
-      console.log();
-
-      let def = new Definition({
-        etymologies: enteries.etymologies,
-        definitions: wordDefinition,
-        examples: examples,
-        lexicalCategory: enteries.lexicalCategory,
-      });
-      def
-        .save()
-        .then((response) => {
-          console.log(response + 'here');
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-      return def;
+      this.definitions = results.entries.map(getEntryData);
+      console.log('Saving doc', JSON.stringify(this));
+      next();
     })
-    .catch((error) => {
-      console.log(error);
+    .catch((err) => {
+      throw new Error(err);
     });
-  console.log('Saving doc', this);
-  next();
 });
 
 const Word = mongoose.model('Word', WordSchema);

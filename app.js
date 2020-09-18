@@ -21,16 +21,16 @@ app.use(
   graphqlHTTP({
     schema: buildSchema(`
         type Definition {
-            etymologies: String
-            definitions: String
-            examples: String
+            etymologies: [String!],
+            definitions: [String!]
+            examples: [String!]
             lexicalCategory: String
         }
 
         type Word {
             _id: ID!
             word: String!
-            definitions: [Definition]
+            definitions: [Definition]!
         }
 
         type Event {
@@ -66,10 +66,14 @@ app.use(
     rootValue: {
       words: () => {
         return Word.find()
-          .then((item) => {
-            return item;
+          .then((words) => {
+            return words.map((word) => {
+              //console.log(JSON.stringify(word));
+              return word;
+            });
           })
           .catch((err) => {
+            console.log(err);
             throw err;
           });
       },
