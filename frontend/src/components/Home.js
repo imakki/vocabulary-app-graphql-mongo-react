@@ -13,17 +13,27 @@ const SEARCH_WORDS = gql`
   }
 `;
 
+const ADD_WORD = gql`
+  mutation AddWord($word: String!) {
+    createWord(word: $word) {
+      _id
+      word
+    }
+  }
+`;
+
 const Home = () => {
   const [wordList, setwordList] = useState([]);
   const [searchWord, setSearchWord] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, seterror] = useState(false);
+  const [addWord, setaddWord] = useState('');
 
   const handleSearchInputChange = (e) => {
     //console.log(e.target.value);
     setSearchWord(e.target.value);
     const variables = {
-      word: e.target.value,
+      word: searchWord,
     };
 
     client
@@ -36,6 +46,24 @@ const Home = () => {
       });
   };
 
+  const handleForm = (e) => {
+    e.preventDefault();
+    console.log(addWord);
+
+    const variables = {
+      word: addWord,
+    };
+
+    client
+      .request(ADD_WORD, variables)
+      .then((res) => {
+        setaddWord(res.createWord);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    setaddWord('');
+  };
   useEffect(() => {
     const GET_WORDS = gql`
       {
@@ -58,7 +86,7 @@ const Home = () => {
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  }, [addWord]);
 
   return wordList && wordList.length ? (
     <div>
@@ -78,6 +106,15 @@ const Home = () => {
           );
         })}
       </ul>
+      <form onSubmit={handleForm}>
+        <input
+          type="text"
+          placeholder="Add Word"
+          value={addWord}
+          onChange={(e) => setaddWord(e.target.value)}
+        />
+        <button type="submit">Add Word</button>
+      </form>
     </div>
   ) : (
     <p>Loading...</p>
